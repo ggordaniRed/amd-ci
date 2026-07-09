@@ -20,6 +20,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_USER_TOKEN }}
         run: |
           gh pr comment ${{ inputs.pr_number }} \
-            --repo ${{ github.repository }} \
+            --repo rh-ecosystem-edge/amd-ci \
             --body "${{ inputs.test_command }}
           /ok-to-test"
