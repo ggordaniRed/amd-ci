@@ -1,0 +1,25 @@
+name: Trigger Prow test
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to comment on'
+        required: true
+        type: string
+      test_command:
+        description: 'Prow /test command (e.g. /test 4.17-stable-e2e-amd-ci-1-5-x)'
+        required: true
+        type: string
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post Prow trigger comment
+        env:
+          GH_TOKEN: ${{ secrets.GH_USER_TOKEN }}
+        run: |
+          gh pr comment ${{ inputs.pr_number }} \
+            --repo ${{ github.repository }} \
+            --body "${{ inputs.test_command }}
+          /ok-to-test"

@@ -46,24 +46,29 @@ jobs:
           TEST_TO_TRIGGER_FILE_PATH: "workflows/generated-files/tests_to_trigger.txt"
           GPU_VERSIONS_TO_TEST_COUNT: ${{ inputs.gpu_versions_to_test_count || '2' }}
       - name: Create Pull Request
+        id: create_pr
         uses: peter-evans/create-pull-request@v7
         with:
           title: "[Automatic] Update versions, run ID: ${{ github.run_id }}"
           commit-message: Update versions
           branch: update-versions/${{ github.run_id }}
           body: |
-            :warning: Before approving the PR, run the following tests:
-
-            ```
-            ${{ steps.read_tests.outputs.TEST_TRIGGERS }}
-            /ok-to-test
-            /approve
-            ```
-
             Update the AMD GPU operator on OpenShift test matrix
             ---
             ${{ vars.VERSION_UPDATE_FLOW_NOTIFY_USERS }}
           delete-branch: true
           assignees: ${{ vars.VERSION_UPDATE_FLOW_ASSIGNEES }}
+      - name: Trigger Prow tests
+        if: steps.create_pr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ secrets.GH_USER_TOKEN }}
+          TEST_TRIGGERS: ${{ steps.read_tests.outputs.TEST_TRIGGERS }}
+          PR_NUMBER: ${{ steps.create_pr.outputs.pull-request-number }}
+        run: |
+          gh pr comment $PR_NUMBER \
+            --repo ${{ github.repository }} \
+            --body "$TEST_TRIGGERS
+          /ok-to-test
+          /approve"
 
             
