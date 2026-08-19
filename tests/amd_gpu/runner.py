@@ -37,9 +37,9 @@ def _resolve_test_targets(test_dir: Path) -> list[str]:
     """Return the pytest target paths based on AMD_GPU_TEST_SUITE.
 
     AMD_GPU_TEST_SUITE values:
-      all           – run every test file (default)
+      all           – run device-plugin and metrics tests (default, no DRA)
       device-plugin – run test_amd_gpu_basic.py only
-      dra           – run test_amd_gpu_dra.py only
+      dra           – run test_amd_gpu_dra.py only (opt-in)
     """
     suite = os.environ.get("AMD_GPU_TEST_SUITE", "all").strip().lower()
     if suite not in _VALID_SUITES:
@@ -53,7 +53,11 @@ def _resolve_test_targets(test_dir: Path) -> list[str]:
         return [str(test_dir / "test_amd_gpu_basic.py")]
     if suite == "dra":
         return [str(test_dir / "test_amd_gpu_dra.py")]
-    return [str(test_dir)]
+    # "all" explicitly excludes DRA — DRA requires opt-in via AMD_GPU_TEST_SUITE=dra
+    return [
+        str(test_dir / "test_amd_gpu_basic.py"),
+        str(test_dir / "test_amd_gpu_metrics.py"),
+    ]
 
 
 def run_gpu_tests(kubeconfig_path: str | Path) -> int:

@@ -8,8 +8,8 @@ test:
 # For local clusters:  make test-gpu KUBECONFIG=~/.kcli/clusters/<name>/auth/kubeconfig
 # For remote clusters: make test-gpu CONFIG_FILE_PATH=cluster-config.yaml  (sets up SSH tunnel automatically)
 # Optional env vars: AMD_DEVICECONFIG_NAME, AMD_GPU_NAMESPACE
-#   AMD_GPU_TEST_SUITE=all|device-plugin|dra  (default: all)
-_AMD_GPU_TEST_TARGET = $(shell python3 -c "import os; s=os.environ.get('AMD_GPU_TEST_SUITE','all'); print({'device-plugin':'tests/amd_gpu/test_amd_gpu_basic.py','dra':'tests/amd_gpu/test_amd_gpu_dra.py'}.get(s,'tests/amd_gpu/'))")
+#   AMD_GPU_TEST_SUITE=all|device-plugin|dra  (default: all = basic+metrics, dra is opt-in)
+_AMD_GPU_TEST_TARGET = $(shell python3 -c "import os; s=os.environ.get('AMD_GPU_TEST_SUITE','all'); print({'device-plugin':'tests/amd_gpu/test_amd_gpu_basic.py','dra':'tests/amd_gpu/test_amd_gpu_dra.py'}.get(s,'tests/amd_gpu/test_amd_gpu_basic.py tests/amd_gpu/test_amd_gpu_metrics.py'))")
 
 test-gpu:
 ifdef CONFIG_FILE_PATH
